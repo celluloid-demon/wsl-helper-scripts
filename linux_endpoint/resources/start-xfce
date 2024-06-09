@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# (ephemeral setup)
+pkill -9 -f xfce4
+pkill -9 -f vcxsrv
+#rm -rf .config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml
+rm -rf .cache/sessions
+startxfce4

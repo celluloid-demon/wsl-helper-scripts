@@ -3,7 +3,11 @@
 # Exit on error
 $ErrorActionPreference = "Stop"
 
+# Declare constants
+$DISTRO_NAME = "ubuntu-24.04"
+
 # Initialize flags with default values
+$FLAG_distro_installed = $false
 $FLAG_pulseaudio_configured = $false
 
 function install-pulseaudio {
@@ -87,10 +91,33 @@ load-module module-native-protocol-tcp port=4713 auth-ip-acl=172.16.0.0/12`n
 
 }
 
+function install-ubuntu {
+
+    # NOTE: Windows PowerShell appears to decode UTF-encoded output from wsl -l as ASCII and the string therefore contains a bunch of NUL-bytes. The proper solution requires (temporarily) setting [Console]::OutputEncoding = [System.Text.Encoding]::Unicode to ensure that PowerShell decodes the output from wsl -l properly.
+
+    # source: https://stackoverflow.com/questions/69811624/in-powershell-how-to-detect-if-wsl-ubuntu-is-installed
+
+    if (wsl --distribution $DISTRO_NAME echo "Hello world.") {
+        
+        $FLAG_distro_installed = $true
+        
+    }
+        
+    if (-not $FLAG_distro_installed) {
+
+        wsl --install $DISTRO_NAME
+
+    }
+
+}
+
 function main {
 
     install-pulseaudio
+
     set-pulseaudio
+
+    install-ubuntu
 
 }
 

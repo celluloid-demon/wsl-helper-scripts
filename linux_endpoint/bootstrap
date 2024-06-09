@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Exit on error
+set -e
+
+# Declare constants
+OS=UBUNTU_WSL
+
+update-packages() {
+
+    if [$OS = UBUNTU_WSL]; then
+
+        sudo apt update
+        sudo apt upgrade -y
+
+    fi
+
+}
+
+install-xfce() {
+
+    if [$OS = UBUNTU_WSL]; then
+
+        sudo apt install -y xubuntu-desktop
+
+    fi
+
+}
+
+main() {
+
+    # this bootstrap should be run INSIDE wsl, install necessary packages and configure them (xfce, display and pulse-server, plus flashing the xfce wrapper)
+
+    update-packages
+
+    install-xfce
+
+    configure-xfce
+
+}
+
+main
