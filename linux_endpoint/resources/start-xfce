@@ -1,8 +1,39 @@
 #!/bin/bash
 
+# Exit on error
+set -e
+
+# Declare constants
+PULSEAUDIO_BIN="/mnt/c/pulseaudio/bin"
+
+if [[ ! -d "$PULSEAUDIO_BIN" ]]; then
+
+    echo "pulseaudio folder not found, exiting"
+    exit 1
+
+fi
+
 # (ephemeral setup)
+
+set +e
+
 pkill -9 -f xfce4
 pkill -9 -f vcxsrv
-#rm -rf .config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml
-rm -rf .cache/sessions
-startxfce4
+
+set -e
+
+config="${HOME}/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
+
+if [[ -f "$config" ]]; then
+
+    sed -i '/property name="use_compositing"/d' "$config"
+
+fi
+
+rm -rf "${HOME}/.cache/sessions"
+
+cd "$PULSEAUDIO_BIN" && ./pulseaudio.exe &
+
+startxfce4 &
+
+echo "xfce started"
