@@ -6,6 +6,9 @@ set -e
 # Declare constants
 EXEC="start-xfce"
 RESOURCES="./resources"
+SETTINGS=".start-xfce.settings"
+
+SETTINGS_PATH="${HOME}/${SETTINGS}"
 
 # User-defined internal switches
 
@@ -52,7 +55,13 @@ install-xfce() {
 
 configure-xfce() {
 
-    if grep -q "export DISPLAY" "${HOME}/.bashrc"; then
+    # if grep -q "export DISPLAY" "${HOME}/.bashrc"; then
+
+    #     FLAG_xfce_configured=1
+
+    # fi
+
+    if [[ -f "$SETTINGS_PATH" ]]; then
 
         FLAG_xfce_configured=1
 
@@ -60,10 +69,11 @@ configure-xfce() {
 
     if [ $OS = UBUNTU_WSL ] && [ $FLAG_xfce_configured -eq 0 ]; then
 
-        cp "${RESOURCES}/${EXEC}" "${HOME}/"
+        cp "${RESOURCES}/${EXEC}"     "${HOME}/"
+        cp "${RESOURCES}/${SETTINGS}" "${HOME}/"
 
-        echo "export DISPLAY=\$(cat /etc/resolv.conf | grep nameserver | awk '{print \$2}'):0"        >> "${HOME}/.bashrc"
-        echo "export PULSE_SERVER=tcp:\$(cat /etc/resolv.conf | grep nameserver | awk '{print \$2}')" >> "${HOME}/.bashrc"
+        # echo "export DISPLAY=\$(cat /etc/resolv.conf | grep nameserver | awk '{print \$2}'):0"        >> "${HOME}/.bashrc"
+        # echo "export PULSE_SERVER=tcp:\$(cat /etc/resolv.conf | grep nameserver | awk '{print \$2}')" >> "${HOME}/.bashrc"
 
         FLAG_restart_required=1
 

@@ -5,6 +5,10 @@ set -e
 
 # Declare constants
 PULSEAUDIO_BIN="/mnt/c/pulseaudio/bin"
+SETTINGS_PATH="${HOME}/.start-xfce.settings"
+
+# Load settings
+source "$SETTINGS_PATH"
 
 if [[ ! -d "$PULSEAUDIO_BIN" ]]; then
 
