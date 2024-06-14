@@ -8,24 +8,32 @@ $DISTRO_NAME = "ubuntu-24.04"
 
 # Initialize flags with default values
 $FLAG_distro_installed = $false
+$FLAG_pulseaudio_installed = $false
 $FLAG_pulseaudio_configured = $false
 
 function install-pulseaudio {
     
     $pulseaudioArchive = "pulseaudio.zip"
-    $pulseaudioPath = "pulseaudio"
+    $pulseaudioPath = ".\pulseaudio"
     $destinationPath = "C:\"
-    
+
+    # (read: in case you remove that stub text file that's keeping the local pulseaudio folder synced with git)
     if (-Not (Test-Path -Path "$pulseaudioPath")) {
         
         New-Item -ItemType Directory -Path "$pulseaudioPath"
     
     }
-    
-    if (-Not (Test-Path -Path "$destinationPath\pulseaudio")) {
-        
+
+    if (Test-Path -Path "$destinationPath\pulseaudio") {
+
+        $FLAG_pulseaudio_installed = $true
+
+    }
+
+    if (-Not $FLAG_pulseaudio_installed) {
+
         Expand-Archive -Path "$pulseaudioPath\$pulseaudioArchive" -DestinationPath "$destinationPath"
-    
+
     }
     
 }
@@ -103,7 +111,7 @@ function install-ubuntu {
         
     }
         
-    if (-not $FLAG_distro_installed) {
+    if (-Not $FLAG_distro_installed) {
 
         wsl --install $DISTRO_NAME
 
