@@ -105,12 +105,16 @@ function install-ubuntu {
 
     # source: https://stackoverflow.com/questions/69811624/in-powershell-how-to-detect-if-wsl-ubuntu-is-installed
 
-    if (wsl --distribution $DISTRO_NAME echo "Hello world.") {
+    # '--quiet' will force command to print only distro names
+    $installedDistros = wsl --list --quiet
+
+    # (note: '-contains' runs on arrays, not strings necessarily; don't expect it to work like grep)
+    if ($installedDistros -contains $DISTRO_NAME) {
         
         $FLAG_distro_installed = $true
-        
+
     }
-        
+
     if (-Not $FLAG_distro_installed) {
 
         wsl --install $DISTRO_NAME
