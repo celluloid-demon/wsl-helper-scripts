@@ -24,6 +24,8 @@ main() {
 
     for i in "${mount[@]}"; do
 
+        echo foobar
+
         sudo umount -t drvfs "${drive[$i]}"
 
         mount_name=$(basename ${mount_path[$i]})
