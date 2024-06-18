@@ -72,7 +72,7 @@ function set-pulseaudio {
 #                                       #
 #########################################
 
-load-module module-waveout sink_name=output source_name=input record=0
+load-module module-waveout sink_name=waveout source_name=wavein record=0
 load-module module-esound-protocol-tcp port=4714 auth-ip-acl=172.16.0.0/12
 load-module module-native-protocol-tcp port=4713 auth-ip-acl=172.16.0.0/12`n
 

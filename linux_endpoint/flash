@@ -5,13 +5,13 @@ set -e
 
 # Declare constants
 EXEC="start-xfce"
-EXEC_SETTINGS=".start-xfce.settings"
+# EXEC_SETTINGS=".start-xfce.settings"
 RESOURCES="./resources"
 
 main() {
 
     cp "${RESOURCES}/${EXEC}"          "${HOME}/"
-    cp "${RESOURCES}/${EXEC_SETTINGS}" "${HOME}/"
+    # cp "${RESOURCES}/${EXEC_SETTINGS}" "${HOME}/"
 
 }
 

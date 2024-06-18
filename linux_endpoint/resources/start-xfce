@@ -1,43 +1,24 @@
 #!/bin/bash
 
-# Exit on error
-set -e
+if [ -z $(pidof xfce4-session) ]; then
 
-# Declare constants
-PULSEAUDIO_BIN="/mnt/c/pulseaudio/bin"
-SETTINGS_PATH="${HOME}/.start-xfce.settings"
+    export DISPLAY=$(ip route list default | awk '{print $3}'):0
+    export PULSE_SERVER=tcp:$(ip route list default | awk '{print $3}')
+    
+    xfwm4_config="${HOME}/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
 
-# Load settings
-source "$SETTINGS_PATH"
-
-if [[ ! -d "$PULSEAUDIO_BIN" ]]; then
-
-    echo "pulseaudio folder not found, exiting"
-    exit 1
-
+    # Fix a bug with compositing not loading correctly, symptom is choppy desktop UI (it initializes as expected tho)
+    sed -i '/property name=\"use_compositing\"/d' "$xfwm4_config"
+    
+    # NOTE: Do NOT start in background (pkill logic will run when user logs out)
+    startxfce4
+    
+    pkill '(gpg|ssh)-agent'
+    taskkill.exe /IM pulseaudio.exe /F
+    taskkill.exe /IM vcxsrv.exe /F
+    
 fi
 
-# (ephemeral setup)
+# (what this looks like run from the host via batch file:)
 
-set +e
-
-pkill -9 -f xfce4
-pkill -9 -f vcxsrv
-
-set -e
-
-config="${HOME}/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
-
-if [[ -f "$config" ]]; then
-
-    sed -i '/property name="use_compositing"/d' "$config"
-
-fi
-
-rm -rf "${HOME}/.cache/sessions"
-
-cd "$PULSEAUDIO_BIN" && ./pulseaudio.exe &
-
-startxfce4 &
-
-echo "xfce started"
+# wsl.exe --distribution ubuntu-24.04 -e bash --login -c "if [ -z $(pidof xfce4-session) ]; then export DISPLAY=$(ip route list default | awk '{print $3}'):0; export PULSE_SERVER=tcp:$(ip route list default | awk '{print $3}'); config=\"${HOME}/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml\"; sed -i '/property name=\"use_compositing\"/d' \"$config\"; startxfce4; pkill '(gpg|ssh)-agent'; taskkill.exe /IM pulseaudio.exe /F; taskkill.exe /IM vcxsrv.exe /F; fi"
