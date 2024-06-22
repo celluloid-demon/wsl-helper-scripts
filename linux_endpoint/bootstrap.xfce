@@ -4,24 +4,25 @@
 set -e
 
 # Declare constants
-EXEC="start-xfce"
+EXEC="start-plasma"
 RESOURCES="./resources"
-SETTINGS=".start-xfce.settings"
+# SETTINGS=".start-xfce.settings"
 
-SETTINGS_PATH="${HOME}/${SETTINGS}"
+# SETTINGS_PATH="${HOME}/${SETTINGS}"
 
 # User-defined internal switches
 
 # Valid distros:
+#   FEDORA_WSL
 #   UBUNTU_WSL
-OS=UBUNTU_WSL
+OS=FEDORA_WSL
 
 # Initialize flags with default values
 FLAG_xfce_installed=0
 FLAG_xfce_configured=0
 FLAG_restart_required=0
 
-update-packages() {
+update_packages() {
 
     if [ $OS = UBUNTU_WSL ]; then
 
@@ -95,7 +96,7 @@ post() {
 
 main() {
 
-    update-packages
+    update_packages
 
     install-xfce
 
