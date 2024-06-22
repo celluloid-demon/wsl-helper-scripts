@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Exit on error
+set -e
+
+# Declare constants
+EXEC="start-xfce"
+# EXEC_SETTINGS=".start-xfce.settings"
+RESOURCES="./resources"
+
+main() {
+
+    cp "${RESOURCES}/${EXEC}"          "${HOME}/"
+    # cp "${RESOURCES}/${EXEC_SETTINGS}" "${HOME}/"
+
+}
+
+main

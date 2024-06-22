@@ -1,0 +1,108 @@
+#!/bin/bash
+
+# Exit on error
+set -e
+
+# Declare constants
+EXEC="start-xfce"
+RESOURCES="./resources"
+SETTINGS=".start-xfce.settings"
+
+SETTINGS_PATH="${HOME}/${SETTINGS}"
+
+# User-defined internal switches
+
+# Valid distros:
+#   UBUNTU_WSL
+OS=UBUNTU_WSL
+
+# Initialize flags with default values
+FLAG_xfce_installed=0
+FLAG_xfce_configured=0
+FLAG_restart_required=0
+
+update-packages() {
+
+    if [ $OS = UBUNTU_WSL ]; then
+
+        sudo apt update
+        sudo apt upgrade -y
+
+    fi
+
+}
+
+install-xfce() {
+
+    set +e
+
+    if which start-xfce4; then
+
+        FLAG_xfce_installed=1
+
+    fi
+
+    set -e
+
+    # (prevent redundant run of apt)
+    if [ $OS = UBUNTU_WSL ] && [ $FLAG_xfce_installed -eq 0 ]; then
+
+        sudo apt install -y xubuntu-desktop
+
+    fi
+
+}
+
+configure-xfce() {
+
+    # if grep -q "export DISPLAY" "${HOME}/.bashrc"; then
+
+    #     FLAG_xfce_configured=1
+
+    # fi
+
+    if [[ -f "$SETTINGS_PATH" ]]; then
+
+        FLAG_xfce_configured=1
+
+    fi
+
+    if [ $OS = UBUNTU_WSL ] && [ $FLAG_xfce_configured -eq 0 ]; then
+
+        cp "${RESOURCES}/${EXEC}"     "${HOME}/"
+        cp "${RESOURCES}/${SETTINGS}" "${HOME}/"
+
+        # echo "export DISPLAY=\$(cat /etc/resolv.conf | grep nameserver | awk '{print \$2}'):0"        >> "${HOME}/.bashrc"
+        # echo "export PULSE_SERVER=tcp:\$(cat /etc/resolv.conf | grep nameserver | awk '{print \$2}')" >> "${HOME}/.bashrc"
+
+        FLAG_restart_required=1
+
+    fi
+
+}
+
+post() {
+
+    if [ $FLAG_restart_required -eq 1 ]; then
+
+        echo
+        echo "  RESTART HIGHLY RECOMMENDED"
+        echo
+
+    fi
+
+}
+
+main() {
+
+    update-packages
+
+    install-xfce
+
+    configure-xfce
+
+    post
+
+}
+
+main

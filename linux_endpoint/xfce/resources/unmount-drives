@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# BEGIN USER CONFIGURATION
+
+declare -a mount=(
+    
+    USB_DRIVE
+    
+    )
+
+declare -A drive=(
+
+    [USB_DRIVE]="E:"
+
+)
+
+declare -A mount_path=(
+
+    [USB_DRIVE]="/mnt/e"
+
+)
+
+main() {
+
+    for i in "${mount[@]}"; do
+
+        echo foobar
+
+        sudo umount -t drvfs "${drive[$i]}"
+
+        mount_name=$(basename ${mount_path[$i]})
+
+        [ -f "${HOME}/Desktop/${mount_name}" ] && rm "${HOME}/Desktop/${mount_name}"
+
+    done
+
+}
+
+main

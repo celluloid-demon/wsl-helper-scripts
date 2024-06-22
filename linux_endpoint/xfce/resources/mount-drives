@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# BEGIN USER CONFIGURATION
+
+declare -a mount=(
+    
+    USB_DRIVE
+    
+    )
+
+declare -A drive=(
+
+    [USB_DRIVE]="E:"
+
+)
+
+declare -A mount_path=(
+
+    [USB_DRIVE]="/mnt/e"
+
+)
+
+main() {
+
+    for i in "${mount[@]}"; do
+
+        sudo mkdir -p "${mount_path[$i]}"
+
+        sudo mount -t drvfs "${drive[$i]}" "${mount_path[$i]}"
+
+        mount_name=$(basename ${mount_path[$i]})
+
+        [ ! -f "${HOME}/Desktop/${mount_name}" ] && ln -s "${mount_path[$i]}" "${HOME}/Desktop/${mount_name}"
+
+    done
+
+}
+
+main
