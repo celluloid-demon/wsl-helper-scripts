@@ -35,7 +35,7 @@ update_packages() {
 
 }
 
-flash_plasma() {
+install_plasma() {
 
     set +eE
 
@@ -70,7 +70,7 @@ flash_plasma_wrapper() {
 
     # todo enforce working directory so this actually PORTABLE ; can run from project-root as './linux_endpoint/res...'
 
-    [ -f "${LOCAL_BIN}/${WRAPPER}" ] && $FLAG_plasma_wrapper_installed=1
+    [ -f "${LOCAL_BIN}/${WRAPPER}" ] && FLAG_plasma_wrapper_installed=1
 
     if [ $FLAG_plasma_wrapper_installed -eq 1 ]; then
 
@@ -90,18 +90,20 @@ configure_lightdm() {
 
     lightdm_conf="/etc/lightdm/lightdm.conf"
 
+    set +eE
+
     sddm_status=$(systemctl is-enabled sddm)
     lightdm_status=$(systemctl is-enabled lightdm)
 
-    [ $sddm_status    = enabled  ] && sudo systemctl disable sddm    && $FLAG_restart_required=1
-    [ $lightdm_status = disabled ] && sudo systemctl enable  lightdm && $FLAG_restart_required=1
+    set -eE
 
-    # todo install logic for /etc/lightdm/lightdm.conf...
+    [ $sddm_status    = enabled  ] && sudo systemctl disable sddm    && FLAG_restart_required=1
+    [ $lightdm_status = disabled ] && sudo systemctl enable  lightdm && FLAG_restart_required=1
 
-    [ ! grep -q '^user-session=plasma$'      "$lightdm_conf" ] && sed -i '/^\[Seat:\*\]/a user-session=plasma'      "$lightdm_conf" && $FLAG_restart_required=1
-    [ ! grep -q '^start-default-seat=false$' "$lightdm_conf" ] && sed -i '/^\[LightDM\]/a start-default-seat=false' "$lightdm_conf" && $FLAG_restart_required=1
-    [ ! grep -q '^enabled=true$'             "$lightdm_conf" ] && sed -i '/^\[XDMCPServer\]/a enabled=true'         "$lightdm_conf" && $FLAG_restart_required=1
-    [ ! grep -q '^port=177$'                 "$lightdm_conf" ] && sed -i '/^\[XDMCPServer\]/a port=177'             "$lightdm_conf" && $FLAG_restart_required=1
+    ! grep -q '^user-session=plasma$'      "$lightdm_conf" && sudo sed -i '/^\[Seat:\*\]/a user-session=plasma'      "$lightdm_conf" && FLAG_restart_required=1
+    ! grep -q '^start-default-seat=false$' "$lightdm_conf" && sudo sed -i '/^\[LightDM\]/a start-default-seat=false' "$lightdm_conf" && FLAG_restart_required=1
+    ! grep -q '^enabled=true$'             "$lightdm_conf" && sudo sed -i '/^\[XDMCPServer\]/a enabled=true'         "$lightdm_conf" && FLAG_restart_required=1
+    ! grep -q '^port=177$'                 "$lightdm_conf" && sudo sed -i '/^\[XDMCPServer\]/a port=177'             "$lightdm_conf" && FLAG_restart_required=1
 
 }
 
@@ -121,7 +123,7 @@ main() {
 
     update_packages
 
-    flash_plasma
+    install_plasma
 
     flash_plasma_wrapper
 
