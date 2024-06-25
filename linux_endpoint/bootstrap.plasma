@@ -35,7 +35,7 @@ update_packages() {
 
 }
 
-install_plasma() {
+flash_plasma() {
 
     set +eE
 
@@ -48,7 +48,8 @@ install_plasma() {
     set -eE
 
     # (prevent redundant run of dnf)
-    [ $FLAG_plasma_installed -eq 1 ]; then
+
+    if [ $FLAG_plasma_installed -eq 1 ]; then
 
         do_nothing=
 
@@ -65,7 +66,7 @@ install_plasma() {
 
 }
 
-install_plasma_wrapper() {
+flash_plasma_wrapper() {
 
     # todo enforce working directory so this actually PORTABLE ; can run from project-root as './linux_endpoint/res...'
 
@@ -120,9 +121,9 @@ main() {
 
     update_packages
 
-    install_plasma
+    flash_plasma
 
-    install_plasma_wrapper
+    flash_plasma_wrapper
 
     configure_lightdm
 
