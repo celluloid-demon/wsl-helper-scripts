@@ -1,29 +1,32 @@
 #!/bin/bash
 
 # Exit on error
-set -e
+set -eE
 
 # Declare constants
-EXEC="start-xfce"
-RESOURCES="./resources"
-SETTINGS=".start-xfce.settings"
-
-SETTINGS_PATH="${HOME}/${SETTINGS}"
+WRAPPER="plasma-wrapper"
+LOCAL_BIN="${HOME}/.local/bin"
+RESOURCES="./resources.plasma"
 
 # User-defined internal switches
 
 # Valid distros:
 #   UBUNTU_WSL
-OS=UBUNTU_WSL
+OS=FEDORA_WSL
 
 # Initialize flags with default values
-FLAG_xfce_installed=0
-FLAG_xfce_configured=0
+FLAG_plasma_installed=0
+FLAG_plasma_wrapper_installed=0
+FLAG_plasma_configured=0
 FLAG_restart_required=0
 
-update-packages() {
+update_packages() {
 
-    if [ $OS = UBUNTU_WSL ]; then
+    if [ $OS = FEDORA_WSL ]; then
+
+        sudo dnf upgrade -y
+
+    elif [ $OS = UBUNTU_WSL ]; then
 
         sudo apt update
         sudo apt upgrade -y
@@ -32,20 +35,29 @@ update-packages() {
 
 }
 
-install-xfce() {
+install_plasma() {
 
-    set +e
+    set +eE
 
-    if which start-xfce4; then
+    if which startplasma-x11; then
 
-        FLAG_xfce_installed=1
+        FLAG_plasma_installed=1
 
     fi
 
-    set -e
+    set -eE
 
-    # (prevent redundant run of apt)
-    if [ $OS = UBUNTU_WSL ] && [ $FLAG_xfce_installed -eq 0 ]; then
+    # (prevent redundant run of dnf)
+    [ $FLAG_plasma_installed -eq 1 ]; then
+
+        do_nothing=
+
+    elif [ $OS = FEDORA_WSL ]; then
+
+        # sudo dnf groupinstall -y "KDE Plasma Workspace" # note: doesn't work with f37?
+        sudo dnf groupinstall -y "KDE Plasma Workspace"
+
+    elif [ $OS = UBUNTU_WSL ]; then
 
         sudo apt install -y xubuntu-desktop
 
@@ -53,27 +65,19 @@ install-xfce() {
 
 }
 
-configure-xfce() {
+install_plasma_wrapper() {
 
-    # if grep -q "export DISPLAY" "${HOME}/.bashrc"; then
+    # todo enforce working directory so this actually PORTABLE ; can run from project-root as './linux_endpoint/res...'
 
-    #     FLAG_xfce_configured=1
+    [ -f "${LOCAL_BIN}/${WRAPPER}" ] && $FLAG_plasma_wrapper_installed=1
 
-    # fi
+    if [ $FLAG_plasma_wrapper_installed -eq 1 ]; then
 
-    if [[ -f "$SETTINGS_PATH" ]]; then
+        do_nothing=
 
-        FLAG_xfce_configured=1
+    elif [ $OS = FEDORA_WSL ] || [ $OS = UBUNTU_WSL ]; then
 
-    fi
-
-    if [ $OS = UBUNTU_WSL ] && [ $FLAG_xfce_configured -eq 0 ]; then
-
-        cp "${RESOURCES}/${EXEC}"     "${HOME}/"
-        cp "${RESOURCES}/${SETTINGS}" "${HOME}/"
-
-        # echo "export DISPLAY=\$(cat /etc/resolv.conf | grep nameserver | awk '{print \$2}'):0"        >> "${HOME}/.bashrc"
-        # echo "export PULSE_SERVER=tcp:\$(cat /etc/resolv.conf | grep nameserver | awk '{print \$2}')" >> "${HOME}/.bashrc"
+        cp "${RESOURCES}/${WRAPPER}" "${LOCAL_BIN}/"
 
         FLAG_restart_required=1
 
@@ -81,7 +85,26 @@ configure-xfce() {
 
 }
 
-post() {
+configure_lightdm() {
+
+    lightdm_conf="/etc/lightdm/lightdm.conf"
+
+    sddm_status=$(systemctl is-enabled sddm)
+    lightdm_status=$(systemctl is-enabled lightdm)
+
+    [ $sddm_status    = enabled  ] && sudo systemctl disable sddm    && $FLAG_restart_required=1
+    [ $lightdm_status = disabled ] && sudo systemctl enable  lightdm && $FLAG_restart_required=1
+
+    # todo install logic for /etc/lightdm/lightdm.conf...
+
+    [ ! grep -q '^user-session=plasma$'      "$lightdm_conf" ] && sed -i '/^\[Seat:\*\]/a user-session=plasma'      "$lightdm_conf" && $FLAG_restart_required=1
+    [ ! grep -q '^start-default-seat=false$' "$lightdm_conf" ] && sed -i '/^\[LightDM\]/a start-default-seat=false' "$lightdm_conf" && $FLAG_restart_required=1
+    [ ! grep -q '^enabled=true$'             "$lightdm_conf" ] && sed -i '/^\[XDMCPServer\]/a enabled=true'         "$lightdm_conf" && $FLAG_restart_required=1
+    [ ! grep -q '^port=177$'                 "$lightdm_conf" ] && sed -i '/^\[XDMCPServer\]/a port=177'             "$lightdm_conf" && $FLAG_restart_required=1
+
+}
+
+exit_zero() {
 
     if [ $FLAG_restart_required -eq 1 ]; then
 
@@ -95,13 +118,15 @@ post() {
 
 main() {
 
-    update-packages
+    update_packages
 
-    install-xfce
+    install_plasma
 
-    configure-xfce
+    install_plasma_wrapper
 
-    post
+    configure_lightdm
+
+    exit_zero
 
 }
 

@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [ -z $(pidof startplasma-x11) ]; then
+
+    export HOST_IP=$(ip route list default | awk '{print $3}')
+    export DISPLAY=$HOST_IP:0
+    export PULSE_SERVER=tcp:$HOST_IP
+    
+    # NOTE: Do NOT start in background (pkill logic will run when user logs out)
+    startplasma-x11
+    
+    pkill '(gpg|ssh)-agent'
+    taskkill.exe /IM pulseaudio.exe /F
+    taskkill.exe /IM vcxsrv.exe /F
+    
+fi
+
+# (what this looks like run from the host via batch file:)
+
+# wsl.exe --distribution fedoraremix -e bash --login -c "/home/jonathan/.local/bin/plasma-wrapper"
