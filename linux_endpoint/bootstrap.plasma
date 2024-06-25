@@ -105,13 +105,18 @@ configure_lightdm() {
     ! grep -q '^enabled=true$'             "$lightdm_conf" && sudo sed -i '/^\[XDMCPServer\]/a enabled=true'         "$lightdm_conf" && FLAG_restart_required=1
     ! grep -q '^port=177$'                 "$lightdm_conf" && sudo sed -i '/^\[XDMCPServer\]/a port=177'             "$lightdm_conf" && FLAG_restart_required=1
 
+    return 0
+
 }
 
 exit_zero() {
 
+    echo
+    echo "  Completed successfully!"
+    echo
+
     if [ $FLAG_restart_required -eq 1 ]; then
 
-        echo
         echo "  RESTART HIGHLY RECOMMENDED"
         echo
 
